@@ -1,3 +1,5 @@
+-- Creación de tablas.
+
 CREATE TABLE "IS".paciente (
 	rut_p varchar(9) NOT NULL,
 	nombre varchar(90) NULL,
@@ -37,3 +39,27 @@ CREATE TABLE "IS".cita (
 	CONSTRAINT cita_rut_m_fkey FOREIGN KEY (rut_m,id_b) REFERENCES "IS".horario(rut_m,id_b),
 	CONSTRAINT cita_rut_p_fkey FOREIGN KEY (rut_p) REFERENCES "IS".paciente(rut_p)
 );
+
+
+
+-- Luego de poblar la base de datos, exceptuando la tabla citas. Se necesita crear una función para que al ingresar una cita, se elimine ese "cupo" en la tabla horarios
+
+create or replace function block_disp()
+returns trigger as $$
+begin 
+	-- Elimina la relación entre el médico y el bloque en la tabla horario. 
+	delete from "IS".horario
+	where rut_m = new.rut_m and id_b = new.id_b;
+	
+	return new;
+end;
+
+$$ language plpgsql;
+
+-- Después de crear la función, se necesita un trigger para que ejecute la función cada que vez que se inserte una cita a la BD. 
+
+create trigger trigger_block_disp
+after insert on "IS".cita
+for each row
+execute procedure block_disp;
+
