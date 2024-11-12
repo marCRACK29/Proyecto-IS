@@ -1,3 +1,7 @@
-.idea/citas.iml
-.idea/misc.xml
-flask/instance/test.db
+venv/
+__pycache__/
+
+# IDEs
+
+/.idea/
+/.vscode/
