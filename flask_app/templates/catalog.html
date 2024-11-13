@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Médicos</title>
+</head>
+<body>
+<h1>Catálogo de Médicos</h1>
+<ul>
+    {% for medico in medicos %}
+    <li>{{ medico[0] }} - Especialidad: {{ medico[1] }}</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
