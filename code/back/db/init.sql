@@ -1,0 +1,32 @@
+CREATE TABLE patient
+(
+	rut VARCHAR(9) NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	
+	PRIMARY KEY(rut)
+);
+
+CREATE TABLE medic
+(
+	rut VARCHAR(9) NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	area VARCHAR(128),
+	
+	PRIMARY KEY(rut)
+);
+
+CREATE TABLE appointment
+(
+	ID INTEGER GENERATED ALWAYS AS IDENTITY,
+	
+	medic VARCHAR(9) NOT NULL,
+	patient VARCHAR(9) NOT NULL,
+	
+	start TIMESTAMP NOT NULL,
+	finish TIMESTAMP NOT NULL,
+	
+	FOREIGN KEY(medic) REFERENCES medic(rut),
+	FOREIGN KEY(patient) REFERENCES patient(rut),
+	
+	PRIMARY KEY(ID)
+);
