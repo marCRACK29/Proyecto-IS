@@ -19,6 +19,11 @@ class DataBase:
 	def __del__(SELF):
 		SELF.cursor.close()
 		SELF.connection.close()
+<<<<<<< HEAD
+=======
+		
+		return
+>>>>>>> 530403d63db4fccf409eb09ab661e7a00a05a321
 	
 	def createAppointment(SELF, medic, patient, start, finish):
 		query = "INSERT INTO appointment (medic, patient, start, finish) VALUES (%s, %s, %s, %s);"
