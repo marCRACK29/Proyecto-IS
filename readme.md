@@ -7,3 +7,23 @@
 * Javier Torres
 * Diego Rebollo
 * Marcos Martínez Rojas
+
+## Ejecución
+
+### Preparar el entorno
+
+Primero, se debe crear un entorno virtual e instalar las dependencias del programa. Esto se puede hace automáticamente ejecutando el script `setup.sh`:
+
+```bash
+[ruta-repositorio]$ chmod +x ./setup.sh
+[ruta-repositorio]$ ./setup.sh
+```
+
+### Ejecutar
+
+Para correr el programa, ejecutar el script `run.sh`:
+
+```bash
+[ruta-repositorio]$ chmod +x ./run.sh
+[ruta-repositorio]$ ./run.sh
+```
