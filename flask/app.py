@@ -52,5 +52,9 @@ def update(id):
     else:
         return render_template('update.html', task = task)
 
+@app.route('/schedules/<int:doctor_id>')
+def show_schedules(doctor_id):
+    return render_template('schedules.html', doctor_id=doctor_id)
+
 if __name__ == "__main__":
     app.run(debug=True)
