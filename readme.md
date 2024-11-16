@@ -10,6 +10,19 @@
 
 ## Ejecución
 
+Se asume un sistema operativo linux.
+
+### Preparar base de datos local (opcional)
+
+Se debe tener instalado y configurado `posgresql` a modo de poder ejecutar los comandos `createdb` y `psql`.
+
+Ejecutar el script de configuración de la base de datos:
+
+```bash
+[ruta-repositorio]/code/back/db$ chmod +x ./db-config.sh
+[ruta-repositorio]/code/back/db$ ./db-config.sh
+```
+
 ### Preparar el entorno
 
 Primero, se debe crear un entorno virtual e instalar las dependencias del programa. Esto se puede hace automáticamente ejecutando el script `setup.sh`:

@@ -3,9 +3,13 @@ class Medic:
 	name = None
 	area = None
 	
-	def __init__(SELF, rut, name, area):
+	agenda = None
+	
+	def __init__(SELF, rut, name, area, agenda):
 		SELF.rut = rut
 		SELF.name = name
 		SELF.area = area
+		
+		SELF.agenda = agenda
 		
 		return

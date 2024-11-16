@@ -1,14 +1,19 @@
 import psycopg
 
+from .Medic import Medic
+
 class DataBase:
 	cursor = None
 	connection = None
 	
-	def __init__(SELF):
-		uri = "postgres://default:di4nXveHD5uj@ep-still-mountain-a42h25z8.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require"
+	def __init__(SELF, access):
+		user = access["user"]
+		host = access["host"]
+		database = access["database"]
+		password = access["password"]
 		
 		try:
-			SELF.connection = psycopg.connect(uri, autocommit = True)
+			SELF.connection = psycopg.connect(user = user, host = host, dbname = database, password = password, autocommit = True)
 			SELF.cursor = SELF.connection.cursor()
 		
 		except Exception as exception:
@@ -22,9 +27,45 @@ class DataBase:
 		
 		return
 	
-	def createAppointment(SELF, medic, patient, start, finish):
-		query = "INSERT INTO appointment (medic, patient, start, finish) VALUES (%s, %s, %s, %s);"
-		data = (medic.rut, patient.rut, start, finish)
+	def userExists(SELF, rut):
+		exists = True
+		
+		return exists
+	
+	def medicExists(SELF, rut):
+		exists = True
+		
+		return exists
+	
+	def getMedics(SELF):
+		query = "SELECT * FROM medic;"
+		data = None
+		
+		try:
+			SELF.cursor.execute(query)
+			
+			data = SELF.cursor.fetchall()
+		
+		except Exception as exception:
+			raise Exception("[ERROR]")
+		
+		medics = []
+			
+		for row in data:
+			medic = Medic(row[0], row[1], row[2], None)
+			
+			medics.append(medic)
+		
+		return medics
+	
+	def getAppointments(SELF, medic):
+		appointments = [Appointment(None, None, None, None)]
+		
+		return appointments
+	
+	def createAppointment(SELF, agendaID, medic, patient):
+		query = "INSERT INTO appointment (agendaID, rutM, rutP) VALUES (%s, %s, %s);"
+		data = (agendaID, medic.rut, patient.rut)
 		
 		try:
 			SELF.cursor.execute(query, data)
@@ -34,4 +75,7 @@ class DataBase:
 		except Exception as exception:
 			raise Exception("[ERROR]")
 		
+		return
+	
+	def deleteAppointment(SELF, appointment):
 		return
