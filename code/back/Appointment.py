@@ -1,19 +1,15 @@
 class Appointment:
-	ID = None
-	
 	medic = None
 	patient = None
 	
-	start = None
-	finish = None
+	agendaID = None
+	interval = None
 	
-	def __init__(SELF, ID, medic, patient, start, finish):
-		SELF.ID = ID
-		
+	def __init__(SELF, medic, patient, agendaID, interval):
 		SELF.medic = medic
 		SELF.patient = patient
 		
-		SELF.start = start
-		SELF.finish = finish
+		SELF.agendaID = agendaID
+		SELF.interval = interval
 		
 		return

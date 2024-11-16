@@ -1,0 +1,73 @@
+CREATE TABLE patient
+(
+	rut VARCHAR(9) NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	
+	PRIMARY KEY(rut)
+);
+
+CREATE TABLE medic
+(
+	rut VARCHAR(9) NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	area VARCHAR(128),
+	
+	PRIMARY KEY(rut)
+);
+
+CREATE TABLE block
+(
+	start TIMESTAMP NOT NULL,
+	finish TIMESTAMP NOT NULL,
+	
+	PRIMARY KEY(start)
+);
+
+CREATE TABLE agenda
+(
+	ID INTEGER GENERATED ALWAYS AS IDENTITY,
+	
+	rutM VARCHAR(9) NOT NULL,
+	start TIMESTAMP NOT NULL,
+	
+	free BOOLEAN DEFAULT TRUE,
+	
+	FOREIGN KEY(rutM) REFERENCES medic(rut),
+	FOREIGN KEY(start) REFERENCES block(start),
+	
+	PRIMARY KEY(ID)
+);
+
+CREATE TABLE appointment
+(
+	agendaID INTEGER,
+	
+	rutM VARCHAR(9),
+	rutP VARCHAR(9),
+	
+	FOREIGN KEY(agendaID) REFERENCES agenda(ID),
+	
+	FOREIGN KEY(rutM) REFERENCES medic(rut),
+	FOREIGN KEY(rutP) REFERENCES patient(rut),
+	
+	PRIMARY KEY(agendaID, rutP)
+);
+
+CREATE OR REPLACE FUNCTION setFree() RETURNS TRIGGER AS $$
+BEGIN
+	UPDATE agenda SET free = TRUE WHERE ID = new.agendaID;
+	
+	RETURN new;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION unsetFree() RETURNS TRIGGER AS $$
+BEGIN
+	UPDATE agenda SET free = FALSE WHERE ID = new.agendaID;
+	
+	RETURN new;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER setFree AFTER DELETE ON appointment FOR EACH row EXECUTE PROCEDURE setFree();
+CREATE TRIGGER unsetFree AFTER INSERT ON appointment FOR EACH row EXECUTE PROCEDURE unsetFree();
