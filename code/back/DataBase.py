@@ -1,4 +1,5 @@
 import psycopg
+from .Medic import Medic
 
 class DataBase:
 	cursor = None
@@ -6,6 +7,7 @@ class DataBase:
 	
 	def __init__(SELF):
 		uri = "postgres://default:di4nXveHD5uj@ep-still-mountain-a42h25z8.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require"
+		SELF.medics = []
 		
 		try:
 			SELF.connection = psycopg.connect(uri, autocommit = True)
@@ -19,15 +21,13 @@ class DataBase:
 	def __del__(SELF):
 		SELF.cursor.close()
 		SELF.connection.close()
-<<<<<<< HEAD
-=======
-		
+
 		return
->>>>>>> 530403d63db4fccf409eb09ab661e7a00a05a321
 	
 	def createAppointment(SELF, medic, patient, start, finish):
 		query = "INSERT INTO appointment (medic, patient, start, finish) VALUES (%s, %s, %s, %s);"
 		data = (medic.rut, patient.rut, start, finish)
+		SELF.medics.append(medic)
 		
 		try:
 			SELF.cursor.execute(query, data)
@@ -38,3 +38,7 @@ class DataBase:
 			raise Exception("[ERROR]")
 		
 		return
+
+	def get_all_medics(SELF) -> list:
+		#return SELF.medics
+		return [Medic(213472349, "Antonio", "Traumatología"), Medic(123456789, "Juan", "Pediatría"), Medic(987654321, "María", "Cardiología")]
