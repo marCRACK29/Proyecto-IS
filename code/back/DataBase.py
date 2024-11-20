@@ -9,10 +9,11 @@ class DataBase:
 	def __init__(SELF, access):
 		user = access["user"]
 		host = access["host"]
-		dbname = access["dbname"]
+		database = access["database"]
+		password = access["password"]
 		
 		try:
-			SELF.connection = psycopg.connect(user = user, host = host, dbname = dbname, autocommit = True)
+			SELF.connection = psycopg.connect(user = user, host = host, dbname = database, password = password, autocommit = True)
 			SELF.cursor = SELF.connection.cursor()
 		
 		except Exception as exception:

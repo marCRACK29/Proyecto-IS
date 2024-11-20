@@ -1,10 +1,12 @@
+import sys
 import json
+
 from datetime import datetime
 
 from back import *
 
 def main():
-	access = json.loads(open("./db-data.json").read())
+	access = json.loads(open(sys.path[0] + "/back/db/db-data.json").read())
 	database = DataBase(access)
 	
 	testGetMedics(database)
