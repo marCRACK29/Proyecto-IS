@@ -1,32 +1,30 @@
 import sys
 import json
 
-from datetime import datetime
+from flask import Flask, jsonify, render_template
 
 from back import *
 
-def main():
-	access = json.loads(open(sys.path[0] + "/back/db/db-data.json").read())
-	database = DataBase(access)
-	
-	testGetMedics(database)
-	testCreateAppointment(database)
-	
-	return
+app = Flask(__name__)
 
-def testGetMedics(database):
-	for medic in database.getMedics():
+access = json.loads(open(sys.path[0] + "/back/db/db-data.json").read())
+database = DataBase(access)
+
+@app.route('/api/medics', methods = ['GET'])
+def getMedics():
+	medics = database.getMedics()
+	medicsData = []
+	
+	for medic in medics:
 		print(f"{medic.rut} {medic.name} {medic.area}")
+		
+		medicsData.append({'name': medic.name, 'speciality': medic.area})
+	
+	return jsonify(medicsData)
 
-def testCreateAppointment(database):
-	agendaID = 1
-	
-	medic = Medic("100000000", None, None, None)
-	patient = Patient("000000001", None)
-	
-	database.createAppointment(agendaID = agendaID, medic = medic, patient = patient)
-	
-	return
+@app.route('/')
+def index():
+	return render_template('catalog.html')
 
 if __name__ == "__main__":
-	main()
+	app.run()
