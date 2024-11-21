@@ -1,6 +1,7 @@
 import psycopg
 
 from .Medic import Medic
+from .Appointment import Appointment
 
 class DataBase:
 	cursor = None
@@ -53,9 +54,9 @@ class DataBase:
 			
 		for row in data:
 			medic = Medic(row[0], row[1], row[2], None)
-			
 			medics.append(medic)
-		
+			print(f"Data from query: {data}")
+
 		return medics
 	
 	def getAppointments(SELF, medic):

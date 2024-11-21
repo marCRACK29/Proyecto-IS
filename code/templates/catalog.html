@@ -27,20 +27,23 @@
 		</table>
 		
 		<script>
-			async function fetchMedics()
-			{
+			async function fetchMedics() {
 				const rawData = await fetch('/api/medics');
 				const medicData = await rawData.json();
-				
 				$('#catalog').DataTable({
 					data: medicData,
 					columns: [
-						{ data: 'name' },
+						{
+							data: 'name',
+							render: function(data) {
+								return `<a href="/medic/${data}">${data}</a>`;
+							}
+						},
 						{ data: 'speciality' }
 					],
 				});
 			}
-			
+
 			fetchMedics();
 		</script>
 	</body>

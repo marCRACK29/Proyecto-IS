@@ -14,7 +14,7 @@ database = DataBase(access)
 def getMedics():
 	medics = database.getMedics()
 	medicsData = []
-	
+	print(f"Medics retrieved: {medics}")
 	for medic in medics:
 		print(f"{medic.rut} {medic.name} {medic.area}")
 		
@@ -22,9 +22,20 @@ def getMedics():
 	
 	return jsonify(medicsData)
 
+@app.route('/medic/<medic_id>')
+def medic_page(medic_id):
+	# Buscar datos del médico en la base de datos
+	medic = next((m for m in database.getMedics() if m.name == medic_id), None)
+
+	if medic:
+		return render_template('medic.html', medic=medic)
+	else:
+		return "Médico no encontrado", 404
+
+
 @app.route('/')
 def index():
 	return render_template('catalog.html')
 
 if __name__ == "__main__":
-	app.run()
+	app.run(debug = True)
