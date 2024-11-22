@@ -13,6 +13,11 @@
 	</head>
 	
 	<body>
+        <label for="specialityFilter">Filtrar por especialidad:</label>
+        <select id="specialityFilter">
+            <option value="">Todas</option>
+        </select>
+
 		<h1> Catálogo de Médicos </h1>
 		<table id = "catalog" class = "display">
 			<thead>
@@ -30,7 +35,19 @@
 			async function fetchMedics() {
 				const rawData = await fetch('/api/medics');
 				const medicData = await rawData.json();
-				$('#catalog').DataTable({
+
+                // Llenar el selector de especialidades
+                const specialities = [...new Set(medicData.map(m => m.speciality))];
+                const specialityFilter = document.getElementById('specialityFilter');
+                specialities.forEach(speciality => {
+                    const option = document.createElement('option');
+                    option.value = speciality;
+                    option.textContent = speciality;
+                    specialityFilter.appendChild(option);
+                });
+
+                // Iniciar tabla
+                const table = $('#catalog').DataTable({
 					data: medicData,
 					columns: [
 						{
@@ -42,6 +59,21 @@
 						{ data: 'speciality' }
 					],
 				});
+
+                // Filtrar la tabla al cambiar la especialidad
+                specialityFilter.addEventListener('change', async () => {
+                    const selectedSpeciality = specialityFilter.value;
+                    let filteredData;
+
+                    if (selectedSpeciality) {
+                        const filteredRawData = await fetch(`/api/medics/filter/${selectedSpeciality}`);
+                        filteredData = await filteredRawData.json();
+                    } else {
+                        filteredData = medicData;
+                    }
+
+                    table.clear().rows.add(filteredData).draw();
+                });
 			}
 
 			fetchMedics();

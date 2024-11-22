@@ -32,6 +32,13 @@ def medic_page(medic_id):
 	else:
 		return "Médico no encontrado", 404
 
+@app.route('/api/medics/filter/<speciality>', methods=['GET'])
+def getMedicsBySpeciality(speciality):
+	medics = database.getMedics()
+	filtered_medics = [medic for medic in medics if medic.area.lower() == speciality.lower()]
+	medicsData = [{'name': medic.name, 'speciality': medic.area} for medic in filtered_medics]
+	return jsonify(medicsData)
+
 
 @app.route('/')
 def index():
