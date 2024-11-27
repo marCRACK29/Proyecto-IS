@@ -11,7 +11,10 @@
     <div id="schedule-root"></div>
 
     <script type="text/babel">
-        function ScheduleInterface() {
+        async function ScheduleInterface() {
+            const rawData = await fetch('/api/medic/{{ medic.rut }}/schedule');
+            const schedule = await rawData.json();
+            /*
             const [date, setDate] = React.useState(new Date());
             const [selectedTime, setSelectedTime] = React.useState(null);
             const [confirmedTime, setConfirmedTime] = React.useState(null); // Nuevo estado para almacenar la cita confirmada
@@ -29,7 +32,7 @@
                 { time: '16:00', available: true },
                 { time: '16:30', available: false },
             ]);
-
+            */
             const handleTimeSelect = (time) => {
                 setSelectedTime(time);
             };

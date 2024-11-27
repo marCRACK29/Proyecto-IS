@@ -33,7 +33,7 @@
 		
 		<script>
 			async function fetchMedics() {
-				const rawData = await fetch('/api/medics');
+				const rawData = await fetch('/api/medics'); // llama a funcion getMedics
 				const medicData = await rawData.json();
 
                 // Llenar el selector de especialidades
