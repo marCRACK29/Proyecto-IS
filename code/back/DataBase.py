@@ -32,18 +32,43 @@ class DataBase:
 		return
 	
 	def userExists(SELF, rut):
-		exists = True
+		query = "SELECT * FROM patient WHERE rut = %s AND name = %s;"
+		data = None
+
+		try:
+			SELF.cursor.execute(query)
+			
+			data = SELF.cursor.fetchone()
 		
-		return exists
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		if data:
+			return True
+		
+		return False
 	
 	def medicExists(SELF, rut):
-		exists = True
+		query = "SELECT * FROM medic WHERE rut = %s AND name = %s;"
+		data = None
+
+		try:
+			SELF.cursor.execute(query)
+			
+			data = SELF.cursor.fetchone()
 		
-		return exists
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		if data:
+			return True
+		
+		return False
 
 	##
 	def agendaExists(SELF, rut):
 		exists = True
+		
 		return exists
 	##
 
@@ -53,15 +78,19 @@ class DataBase:
 
 		try:
 			SELF.cursor.execute(query)
+			
 			data = SELF.cursor.fetchall()
+		
 		except Exception as exception:
 			raise Exception(f"[ERROR] {exception}")
 
 		agendas = []
 
 		for row in data:
-			agenda_item = Agenda(row[0],row[1], row[2], True)
+			agenda_item = Agenda(row[0], row[1], row[2], True)
+			
 			agendas.append(agenda_item)
+		
 		return agendas
 	
 	def getMedics(SELF):
@@ -74,7 +103,7 @@ class DataBase:
 			data = SELF.cursor.fetchall()
 		
 		except Exception as exception:
-			raise Exception("[ERROR]")
+			raise Exception(f"[ERROR] {exception}")
 		
 		medics = []
 			
