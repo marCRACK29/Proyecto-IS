@@ -13,11 +13,6 @@
 	</head>
 	
 	<body>
-        <label for="specialityFilter">Filtrar por especialidad:</label>
-        <select id="specialityFilter">
-            <option value="">Todas</option>
-        </select>
-
 		<h1> Catálogo de Médicos </h1>
 		<table id = "catalog" class = "display">
 			<thead>
@@ -32,51 +27,96 @@
 		</table>
 		
 		<script>
-			async function fetchMedics() {
+			async function fetchMedics()
+			{
 				const rawData = await fetch('/api/medics');
 				const medicData = await rawData.json();
 
-                // Llenar el selector de especialidades
-                const specialities = [...new Set(medicData.map(m => m.speciality))];
-                const specialityFilter = document.getElementById('specialityFilter');
-                specialities.forEach(speciality => {
-                    const option = document.createElement('option');
-                    option.value = speciality;
-                    option.textContent = speciality;
-                    specialityFilter.appendChild(option);
-                });
-
-                // Iniciar tabla
-                const table = $('#catalog').DataTable({
+				$('#catalog').DataTable({
 					data: medicData,
 					columns: [
-						{
-							data: 'name',
-							render: function(data) {
-								return `<a href="/medic/${data}">${data}</a>`;
-							}
-						},
+						{ data: 'name' },
 						{ data: 'speciality' }
 					],
+					rowCallback: function(row, data) {
+						$(row).on('click', function() {
+							openAgendaModal(data.rut, data.name);
+						});
+					}
 				});
-
-                // Filtrar la tabla al cambiar la especialidad
-                specialityFilter.addEventListener('change', async () => {
-                    const selectedSpeciality = specialityFilter.value;
-                    let filteredData;
-
-                    if (selectedSpeciality) {
-                        const filteredRawData = await fetch(`/api/medics/filter/${selectedSpeciality}`);
-                        filteredData = await filteredRawData.json();
-                    } else {
-                        filteredData = medicData;
-                    }
-
-                    table.clear().rows.add(filteredData).draw();
-                });
 			}
 
 			fetchMedics();
+
+			function openAgendaModal(rut, medicName) {
+				document.getElementById('medic-name').textContent = medicName;
+				document.getElementById('modal').style.display = 'flex';
+				fetchAgenda(rut);
+			}
+
+			function closeModal() {
+				document.getElementById('modal').style.display = 'none';
+			}
+
+			document.getElementById('close-modal').addEventListener('click', closeModal);
+
+			async function fetchAgenda(rut) {
+				const rawData = await fetch(`/api/medic/${rut}/agenda`);
+				const agendaData = await rawData.json();
+
+				$('#agenda').DataTable({
+					destroy: true,
+					data: agendaData,
+					columns: [
+						{ data: 'start' },
+						{ data: 'free' }
+					]
+				});
+			}
 		</script>
+
+		<!-- Modal para Horarios -->
+		<div id="modal" style="display: none;">
+			<div id="modal-content">
+				<span id="close-modal">&times;</span>
+				<h2>Horarios de <span id="medic-name"></span></h2>
+				<table id="agenda" class="display">
+					<thead>
+						<tr>
+							<th>Hora de Inicio</th>
+							<th>Disponible</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<style>
+			/* Estilo básico para el modal */
+			#modal {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.5);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#modal-content {
+				background: white;
+				padding: 20px;
+				border-radius: 8px;
+				width: 50%;
+			}
+			#close-modal {
+				cursor: pointer;
+				float: right;
+				font-size: 20px;
+			}
+		</style>
 	</body>
 </html>

@@ -1,7 +1,10 @@
 import psycopg
 
 from .Medic import Medic
+##
+from .Agenda import Agenda
 from .Appointment import Appointment
+##
 
 class DataBase:
 	cursor = None
@@ -37,7 +40,30 @@ class DataBase:
 		exists = True
 		
 		return exists
-	
+
+	##
+	def agendaExists(SELF, rut):
+		exists = True
+		return exists
+	##
+
+	def getAgenda(SELF):
+		query = "SELECT ID, rutM, start, free FROM Agenda;"
+		data = None
+
+		try:
+			SELF.cursor.execute(query)
+			data = SELF.cursor.fetchall()
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+
+		agendas = []
+
+		for row in data:
+			agenda_item = Agenda(row[0],row[1], row[2], True)
+			agendas.append(agenda_item)
+		return agendas
+
 	def getMedics(SELF):
 		query = "SELECT * FROM medic;"
 		data = None
@@ -54,9 +80,9 @@ class DataBase:
 			
 		for row in data:
 			medic = Medic(row[0], row[1], row[2], None)
+			
 			medics.append(medic)
-			print(f"Data from query: {data}")
-
+		
 		return medics
 	
 	def getAppointments(SELF, medic):
