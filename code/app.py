@@ -19,12 +19,7 @@ def login():
         rut = request.form.get('rut')
         name = request.form.get('name')
 
-        # Verificar paciente en la base de datos
-        query = "SELECT * FROM Patient WHERE rut = %s AND name = %s;"
-        database.cursor.execute(query, (rut, name))
-        patient = database.cursor.fetchone()
-
-        if patient:
+        if database.userExists(rut):
             # Guardar información del usuario en la sesión
             session['user'] = {"rut": rut, "name": name}
             return redirect(url_for('index'))

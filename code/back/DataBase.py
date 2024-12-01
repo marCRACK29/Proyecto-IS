@@ -32,11 +32,11 @@ class DataBase:
 		return
 	
 	def userExists(SELF, rut):
-		query = "SELECT * FROM patient WHERE rut = %s AND name = %s;"
+		query = "SELECT * FROM patient WHERE rut = %s;"
 		data = None
 
 		try:
-			SELF.cursor.execute(query)
+			SELF.cursor.execute(query, (rut, ))
 			
 			data = SELF.cursor.fetchone()
 		
@@ -49,11 +49,11 @@ class DataBase:
 		return False
 	
 	def medicExists(SELF, rut):
-		query = "SELECT * FROM medic WHERE rut = %s AND name = %s;"
+		query = "SELECT * FROM medic WHERE rut = %s;"
 		data = None
 
 		try:
-			SELF.cursor.execute(query)
+			SELF.cursor.execute(query, (rut, ))
 			
 			data = SELF.cursor.fetchone()
 		
@@ -71,9 +71,20 @@ class DataBase:
 		
 		return exists
 	##
+	
+	def createUser(SELF, rut, name):
+		query = "INSERT INTO patient (rut, name) VALUES (%s, %s)"
+		
+		try:
+			SELF.cursor.execute(query, (rut, name))
+		
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		return
 
 	def getAgenda(SELF):
-		query = "SELECT ID, rutM, start, free FROM Agenda;"
+		query = "SELECT ID, rutM, start, free FROM agenda;"
 		data = None
 
 		try:
