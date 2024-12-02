@@ -15,60 +15,62 @@ database = DataBase(access)
 # Ruta de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        rut = request.form.get('rut')
-        name = request.form.get('name')
+	if request.method == 'POST':
+		rut = request.form.get('rut')
+		name = request.form.get('name')
 
-        if database.userExists(rut):
-            # Guardar información del usuario en la sesión
-            session['user'] = {"rut": rut, "name": name}
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html', error="Rut o nombre incorrecto.")
+		if database.userExists(rut):
+			# Guardar información del usuario en la sesión
+			session['user'] = {"rut": rut, "name": name}
+			return redirect(url_for('index'))
+		else:
+			return render_template('login.html', error="Rut o nombre incorrecto.")
 
-    # Mostrar formulario de login
-    return render_template('login.html')
+	# Mostrar formulario de login
+	return render_template('login.html')
 
 
 # Ruta del catálogo (restringida)
 @app.route('/')
 def index():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('catalog.html')
+	if 'user' not in session:
+		return redirect(url_for('login'))
+	return render_template('catalog.html')
 
 
 # API para obtener médicos
 @app.route('/api/medics', methods=['GET'])
 def getMedics():
-    medics = database.getMedics()
-    medicsData = []
+	medics = database.getMedics()
+	medicsData = []
 
-    for medic in medics:
-        medicsData.append({
-            'name': medic.name,
-            'speciality': medic.area,
-            'rut': medic.rut
-        })
+	for medic in medics:
+		medicsData.append({
+			'name': medic.name,
+			'speciality': medic.area,
+			'rut': medic.rut
+		})
 
-    return jsonify(medicsData)
+	return jsonify(medicsData)
 
 
 # API para obtener agenda de un médico
 @app.route('/api/medic/<rut>/agenda', methods=['GET'])
 def getMedicAgenda(rut):
-    try:
-        query = "SELECT ID, rutM, start, free FROM Agenda WHERE rutM = %s;"
-        database.cursor.execute(query, (rut,))
-        data = database.cursor.fetchall()
-        agenda_list = [
-            {"id": row[0], "rutM": row[1], "start": row[2], "free": row[3]}
-            for row in data
-        ]
-        return jsonify(agenda_list)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+	agendas = database.getAgenda(rut)
+	data = []
+	
+	for agenda in agendas:
+		data.append({
+			'id': agenda.ID,
+			'rutM': agenda.rutM,
+			'day': agenda.start.strftime("%A %d"),
+			'month': agenda.start.strftime("%B"),
+			'year': agenda.start.strftime("%Y"),
+			'time': agenda.start.strftime("%H:%M"),
+		})
+	
+	return jsonify(data)
 
 if __name__ == "__main__":
-    app.run()
+	app.run()

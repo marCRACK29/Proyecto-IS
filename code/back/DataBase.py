@@ -83,12 +83,12 @@ class DataBase:
 		
 		return
 
-	def getAgenda(SELF):
-		query = "SELECT ID, rutM, start, free FROM agenda;"
+	def getAgenda(SELF, rutM):
+		query = "SELECT ID, rutM, start, free FROM agenda WHERE rutM = %s;"
 		data = None
 
 		try:
-			SELF.cursor.execute(query)
+			SELF.cursor.execute(query, (rutM, ))
 			
 			data = SELF.cursor.fetchall()
 		
@@ -96,7 +96,7 @@ class DataBase:
 			raise Exception(f"[ERROR] {exception}")
 
 		agendas = []
-
+		
 		for row in data:
 			agenda_item = Agenda(row[0], row[1], row[2], True)
 			
