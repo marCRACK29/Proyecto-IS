@@ -15,25 +15,48 @@ database = DataBase(access)
 # Ruta de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.clear() # Limpiar la sesión
     if request.method == 'POST':
         rut = request.form.get('rut')
         name = request.form.get('name')
 
         # Verificar paciente en la base de datos
-        query = "SELECT * FROM Patient WHERE rut = %s AND name = %s;"
-        database.cursor.execute(query, (rut, name))
+        query = "SELECT * FROM Patient WHERE rut = %s;"
+        database.cursor.execute(query, (rut,))
         patient = database.cursor.fetchone()
 
         if patient:
             # Guardar información del usuario en la sesión
-            session['user'] = {"rut": rut, "name": name}
+            session['user'] = {"rut": rut, "name": patient[1]}
             return redirect(url_for('index'))
         else:
-            return render_template('login.html', error="Rut o nombre incorrecto.")
+            return redirect(url_for('register', rut=rut))
 
     # Mostrar formulario de login
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    rut = request.args.get('rut')  # Recuperar el RUT desde la redirección
+
+    if request.method == 'POST':
+        rut = request.form.get('rut')
+        name = request.form.get('name')
+
+        # Insertar el nuevo usuario en la base de datos
+        query = "INSERT INTO Patient (rut, name) VALUES (%s, %s);"
+        database.cursor.execute(query, (rut, name))
+        session['user'] = {"rut": rut, "name": name}
+
+        return redirect(url_for('index'))
+
+    return render_template('register.html', rut=rut)
+
+@app.before_request
+def clear_session_on_index():
+    # Limpiar la sesión solo si el usuario intenta acceder al índice sin estar logueado
+    if request.endpoint == 'index' and 'user' not in session:
+        session.clear()
 
 # Ruta del catálogo (restringida)
 @app.route('/')
@@ -76,4 +99,4 @@ def getMedicAgenda(rut):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

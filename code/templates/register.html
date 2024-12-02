@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro</title>
+</head>
+<body>
+<h1>Registro</h1>
+<form method="POST" action="/register">
+    <input type="hidden" name="rut" value="{{ rut }}">
+    <label for="name">Nombre:</label>
+    <input type="text" id="name" name="name" required><br>
+
+    <button type="submit">Registrarse</button>
+</form>
+</body>
+</html>
