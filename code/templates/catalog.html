@@ -56,7 +56,7 @@
 				fetchAgenda(rut);
 			}
 
-			function closeModal()
+			function closeAgendaModal()
 			{
 				document.getElementById('modal').style.display = 'none';
 			}
@@ -74,15 +74,32 @@
 						{ data: 'month' },
 						{ data: 'year' },
 						{ data: 'time' },
-					]
+					],
+					rowCallback: function(row, data) {
+						$(row).on('click', function() {
+							createAppointment(data.ID, rut);
+						});
+					}
 				});
+			}
+			
+			async function createAppointment(agendaID, rutM)
+			{
+				var data = JSON.stringify({
+					agendaID: agendaID,
+					rutM: rutM
+				});
+				
+				const response = await fetch(`/api/createAppointment`, {method: "PUT", body: data});
+				
+				console.log(response.status);
 			}
 		</script>
 
 		<!-- Modal para Horarios -->
 		<div id="modal" style="display: none;">
 			<div id="modal-content">
-				<span id="close-modal" onclick="closeModal();">&times;</span>
+				<span id="close-modal" onclick="closeAgendaModal();">&times;</span>
 				<h2>Horas disponibles para <span id="medic-name"></span></h2>
 				<table id="agenda" class="display">
 					<thead>

@@ -130,9 +130,9 @@ class DataBase:
 		
 		return appointments
 	
-	def createAppointment(SELF, agendaID, medic, patient):
+	def createAppointment(SELF, agendaID, rutM, rutP):
 		query = "INSERT INTO appointment (agendaID, rutM, rutP) VALUES (%s, %s, %s);"
-		data = (agendaID, medic.rut, patient.rut)
+		data = (agendaID, rutM, rutP)
 		
 		try:
 			SELF.cursor.execute(query, data)

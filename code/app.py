@@ -54,6 +54,19 @@ def getMedics():
 	return jsonify(medicsData)
 
 
+@app.route('/api/createAppointment', methods=['PUT'])
+def createAppointment():
+	data = json.loads(request.data)
+	
+	agendaID = data["agendaID"]
+	
+	rutM = data["rutM"]
+	rutP = session['user']['rut']
+	
+	database.createAppointment(agendaID, rutM, rutP)
+	
+	return jsonify(data)
+
 # API para obtener agenda de un médico
 @app.route('/api/medic/<rut>/agenda', methods=['GET'])
 def getMedicAgenda(rut):
@@ -62,7 +75,7 @@ def getMedicAgenda(rut):
 	
 	for agenda in agendas:
 		data.append({
-			'id': agenda.ID,
+			'ID': agenda.ID,
 			'rutM': agenda.rutM,
 			'day': agenda.start.strftime("%A %d"),
 			'month': agenda.start.strftime("%B"),
