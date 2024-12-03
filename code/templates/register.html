@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='form.css') }}">
 </head>
 <body>
 <h1>Registro</h1>
+
 <form method="POST" action="/register">
-    <input type="hidden" name="rut" value="{{ rut }}">
+    <label for="rut">RUT:</label>
+    <input type="text" id="rut" name="rut" required><br>
+
     <label for="name">Nombre:</label>
     <input type="text" id="name" name="name" required><br>
 

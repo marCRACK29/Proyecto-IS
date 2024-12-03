@@ -37,20 +37,18 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    rut = request.args.get('rut')  # Recuperar el RUT desde la redirección
-
     if request.method == 'POST':
         rut = request.form.get('rut')
         name = request.form.get('name')
 
-        # Insertar el nuevo usuario en la base de datos
+        # Inserción del nuevo usuario en la base de datos, incluyendo la contraseña
         query = "INSERT INTO Patient (rut, name) VALUES (%s, %s);"
         database.cursor.execute(query, (rut, name))
         session['user'] = {"rut": rut, "name": name}
 
         return redirect(url_for('index'))
 
-    return render_template('register.html', rut=rut)
+    return render_template('register.html')
 
 @app.before_request
 def clear_session_on_index():
