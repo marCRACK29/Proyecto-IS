@@ -32,8 +32,8 @@ def login():
         else:
             return redirect(url_for('register', rut=rut))
 
-	# Mostrar formulario de login
-	return render_template('login.html')
+    # Mostrar formulario de login
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -53,57 +53,57 @@ def register():
 # Ruta del catálogo (restringida)
 @app.route('/')
 def index():
-	if 'user' not in session:
-		return redirect(url_for('login'))
-	return render_template('catalog.html')
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return render_template('catalog.html')
 
 
 # API para obtener médicos
 @app.route('/api/medics', methods=['GET'])
 def getMedics():
-	medics = database.getMedics()
-	medicsData = []
+    medics = database.getMedics()
+    medicsData = []
 
-	for medic in medics:
-		medicsData.append({
-			'name': medic.name,
-			'speciality': medic.area,
-			'rut': medic.rut
-		})
+    for medic in medics:
+        medicsData.append({
+            'name': medic.name,
+            'speciality': medic.area,
+            'rut': medic.rut
+        })
 
-	return jsonify(medicsData)
+    return jsonify(medicsData)
 
 
 @app.route('/api/createAppointment', methods=['PUT'])
 def createAppointment():
-	data = json.loads(request.data)
+    data = json.loads(request.data)
 
-	agendaID = data["agendaID"]
+    agendaID = data["agendaID"]
 
-	rutM = data["rutM"]
-	rutP = session['user']['rut']
+    rutM = data["rutM"]
+    rutP = session['user']['rut']
 
-	database.createAppointment(agendaID, rutM, rutP)
+    database.createAppointment(agendaID, rutM, rutP)
 
-	return jsonify(data)
+    return jsonify(data)
 
 # API para obtener agenda de un médico
 @app.route('/api/medic/<rut>/agenda', methods=['GET'])
 def getMedicAgenda(rut):
-	agendas = database.getAgenda(rut)
-	data = []
+    agendas = database.getAgenda(rut)
+    data = []
 
-	for agenda in agendas:
-		data.append({
-			'ID': agenda.ID,
-			'rutM': agenda.rutM,
-			'day': agenda.start.strftime("%A %d"),
-			'month': agenda.start.strftime("%B"),
-			'year': agenda.start.strftime("%Y"),
-			'time': agenda.start.strftime("%H:%M"),
-		})
+    for agenda in agendas:
+        data.append({
+            'ID': agenda.ID,
+            'rutM': agenda.rutM,
+            'day': agenda.start.strftime("%A %d"),
+            'month': agenda.start.strftime("%B"),
+            'year': agenda.start.strftime("%Y"),
+            'time': agenda.start.strftime("%H:%M"),
+        })
 
-	return jsonify(data)
+    return jsonify(data)
 
 if __name__ == "__main__":
-	app.run()
+    app.run()
