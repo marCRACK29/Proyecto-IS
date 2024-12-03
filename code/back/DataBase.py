@@ -32,36 +32,76 @@ class DataBase:
 		return
 	
 	def userExists(SELF, rut):
-		exists = True
+		query = "SELECT * FROM patient WHERE rut = %s;"
+		data = None
+
+		try:
+			SELF.cursor.execute(query, (rut, ))
+			
+			data = SELF.cursor.fetchone()
 		
-		return exists
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		if data:
+			return True
+		
+		return False
 	
 	def medicExists(SELF, rut):
-		exists = True
+		query = "SELECT * FROM medic WHERE rut = %s;"
+		data = None
+
+		try:
+			SELF.cursor.execute(query, (rut, ))
+			
+			data = SELF.cursor.fetchone()
 		
-		return exists
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		if data:
+			return True
+		
+		return False
 
 	##
 	def agendaExists(SELF, rut):
 		exists = True
+		
 		return exists
 	##
+	
+	def createUser(SELF, rut, name):
+		query = "INSERT INTO patient (rut, name) VALUES (%s, %s)"
+		
+		try:
+			SELF.cursor.execute(query, (rut, name))
+		
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+		
+		return
 
-	def getAgenda(SELF):
-		query = "SELECT ID, rutM, start, free FROM Agenda;"
+	def getAgenda(SELF, rutM):
+		query = "SELECT ID, rutM, start, free FROM agenda WHERE rutM = %s;"
 		data = None
 
 		try:
-			SELF.cursor.execute(query)
+			SELF.cursor.execute(query, (rutM, ))
+			
 			data = SELF.cursor.fetchall()
+		
 		except Exception as exception:
 			raise Exception(f"[ERROR] {exception}")
 
 		agendas = []
-
+		
 		for row in data:
-			agenda_item = Agenda(row[0],row[1], row[2], True)
+			agenda_item = Agenda(row[0], row[1], row[2], True)
+			
 			agendas.append(agenda_item)
+		
 		return agendas
 
 	def getMedics(SELF):
@@ -74,7 +114,7 @@ class DataBase:
 			data = SELF.cursor.fetchall()
 		
 		except Exception as exception:
-			raise Exception("[ERROR]")
+			raise Exception(f"[ERROR] {exception}")
 		
 		medics = []
 			
@@ -90,9 +130,9 @@ class DataBase:
 		
 		return appointments
 	
-	def createAppointment(SELF, agendaID, medic, patient):
+	def createAppointment(SELF, agendaID, rutM, rutP):
 		query = "INSERT INTO appointment (agendaID, rutM, rutP) VALUES (%s, %s, %s);"
-		data = (agendaID, medic.rut, patient.rut)
+		data = (agendaID, rutM, rutP)
 		
 		try:
 			SELF.cursor.execute(query, data)

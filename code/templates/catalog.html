@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset = "UTF-8">
-		<title> Grafico de Medicos </title>
+		<title> Catálogo de Medicos </title>
 		
 		<link rel = "stylesheet" href = "{{ url_for('static', filename='style.css') }}">
 		<link rel = "stylesheet" href = "https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
@@ -48,19 +48,21 @@
 
 			fetchMedics();
 
-			function openAgendaModal(rut, medicName) {
+			function openAgendaModal(rut, medicName)
+			{
 				document.getElementById('medic-name').textContent = medicName;
 				document.getElementById('modal').style.display = 'flex';
+				
 				fetchAgenda(rut);
 			}
 
-			function closeModal() {
+			function closeAgendaModal()
+			{
 				document.getElementById('modal').style.display = 'none';
 			}
 
-			document.getElementById('close-modal').addEventListener('click', closeModal);
-
-			async function fetchAgenda(rut) {
+			async function fetchAgenda(rut)
+			{
 				const rawData = await fetch(`/api/medic/${rut}/agenda`);
 				const agendaData = await rawData.json();
 
@@ -68,23 +70,44 @@
 					destroy: true,
 					data: agendaData,
 					columns: [
-						{ data: 'start' },
-						{ data: 'free' }
-					]
+						{ data: 'day' },
+						{ data: 'month' },
+						{ data: 'year' },
+						{ data: 'time' },
+					],
+					rowCallback: function(row, data) {
+						$(row).on('click', function() {
+							createAppointment(data.ID, rut);
+						});
+					}
 				});
+			}
+			
+			async function createAppointment(agendaID, rutM)
+			{
+				var data = JSON.stringify({
+					agendaID: agendaID,
+					rutM: rutM
+				});
+				
+				const response = await fetch(`/api/createAppointment`, {method: "PUT", body: data});
+				
+				console.log(response.status);
 			}
 		</script>
 
 		<!-- Modal para Horarios -->
 		<div id="modal" style="display: none;">
 			<div id="modal-content">
-				<span id="close-modal">&times;</span>
-				<h2>Horarios de <span id="medic-name"></span></h2>
+				<span id="close-modal" onclick="closeAgendaModal();">&times;</span>
+				<h2>Horas disponibles para <span id="medic-name"></span></h2>
 				<table id="agenda" class="display">
 					<thead>
 						<tr>
-							<th>Hora de Inicio</th>
-							<th>Disponible</th>
+							<th>Dia</th>
+							<th>Mes</th>
+							<th>Año</th>
+							<th>Hora</th>
 						</tr>
 					</thead>
 					<tbody>
