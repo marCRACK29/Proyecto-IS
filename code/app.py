@@ -11,29 +11,57 @@ app.secret_key = "your_secret_key"
 access = json.loads(open(sys.path[0] + "/back/db/db-data.json").read())
 database = DataBase(access)
 
+def traducir_dia(dia_ingles):
+    dias_traduccion = {
+        'Monday': 'Lunes',
+        'Tuesday': 'Martes',
+        'Wednesday': 'Miércoles',
+        'Thursday': 'Jueves',
+        'Friday': 'Viernes',
+        'Saturday': 'Sábado',
+        'Sunday': 'Domingo'
+    }
+    return dias_traduccion[dia_ingles]
 
 # Ruta de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    session.clear() # Limpiar la sesión
+    session.clear()  # Limpiar la sesión
     if request.method == 'POST':
         rut = request.form.get('rut')
         name = request.form.get('name')
 
-        # Verificar paciente en la base de datos
-        query = "SELECT * FROM Patient WHERE rut = %s;"
-        database.cursor.execute(query, (rut,))
+        # Verificar si es paciente
+        query_patient = "SELECT * FROM Patient WHERE rut = %s;"
+        database.cursor.execute(query_patient, (rut,))
         patient = database.cursor.fetchone()
 
+        # Si es paciente, se guarda en la sesión y se redirige al catálogo
         if patient:
-            # Guardar información del usuario en la sesión
-            session['user'] = {"rut": rut, "name": patient[1]}
+            session['user'] = {"rut": rut, "name": patient[1], "role": "patient"}
             return redirect(url_for('index'))
-        else:
-            return redirect(url_for('register', rut=rut))
 
-    # Mostrar formulario de login
+        # Verificar si es médico
+        query_medic = "SELECT * FROM Medic WHERE rut = %s;"
+        database.cursor.execute(query_medic, (rut,))
+        medic = database.cursor.fetchone()
+
+        # Si es médico, se guarda en la sesión y se redirige al dashboard del médico
+        if medic:
+            session['user'] = {"rut": rut, "name": medic[1], "role": "medic"}
+            return redirect(url_for('medic_dashboard'))
+
+        # Si no es paciente ni médico, se redirige al registro
+        return redirect(url_for('register', rut=rut))
+
     return render_template('login.html')
+
+# Se utiliza en catalog.html y medic_dashboard.html para cerrar la sesión y volver al login
+@app.route('/logout')
+def logout():
+    session.clear()  # Limpiar la sesión
+    return redirect(url_for('login'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -49,6 +77,25 @@ def register():
         return redirect(url_for('index'))
 
     return render_template('register.html')
+
+@app.route('/medic/dashboard')
+def medic_dashboard():
+    if 'user' not in session or session['user']['role'] != 'medic':
+        return redirect(url_for('login'))
+
+    rut = session['user']['rut']
+    agendas = database.getAgenda(rut)  # Obtiene todas las entradas de la agenda del médico
+
+    # Organizar la agenda en un diccionario por días y horas
+    agenda_semanal = {day: {hour: {'free': True, 'patient': None} for hour in range(8, 18)}
+                      for day in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']}
+
+    for agenda in agendas:
+        day = traducir_dia(agenda.start.strftime('%A'))  # Obtener el día en texto
+        hour = agenda.start.hour
+        agenda_semanal[day][hour] = {'free': agenda.free, 'patient': agenda.rutP if not agenda.free else None}
+
+    return render_template('medic_dashboard.html', agenda=agenda_semanal, user=session['user'])
 
 # Ruta del catálogo (restringida)
 @app.route('/')
@@ -106,4 +153,4 @@ def getMedicAgenda(rut):
     return jsonify(data)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug = True)

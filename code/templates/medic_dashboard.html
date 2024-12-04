@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda Semanal del Médico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='form.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .libre {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .ocupado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+<h1>Bienvenido, Dr. {{ user.name }}</h1>
+<h2>Agenda semanal</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Hora</th>
+        <th>Lunes</th>
+        <th>Martes</th>
+        <th>Miércoles</th>
+        <th>Jueves</th>
+        <th>Viernes</th>
+        <th>Sábado</th>
+        <th>Domingo</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for hour in range(8, 18) %}  <!-- Rango de horas laborales (8am - 6pm) -->
+        <tr>
+            <td>{{ hour }}:00 - {{ hour + 1 }}:00</td>
+            {% for day in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
+                <td class="{% if agenda[day][hour].free %}libre{% else %}ocupado{% endif %}">
+                    {% if agenda[day][hour].free %}
+                        Libre
+                    {% else %}
+                        Ocupado ({{ agenda[day][hour].patient }})
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('logout') }}">Cerrar sesión</a>
+</body>
+</html>
