@@ -87,13 +87,16 @@ def medic_dashboard():
 	agendas = database.getAgenda(rut)  # Obtiene todas las entradas de la agenda del médico
 
 	# Organizar la agenda en un diccionario por días y horas
-	agenda_semanal = {day: {hour: {'free': True, 'patient': None} for hour in range(8, 18)}
+	agenda_semanal = {day: {hour: {'free': True} for hour in range(8, 18)}
 					  for day in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']}
 
 	for agenda in agendas:
 		day = traducir_dia(agenda.start.strftime('%A'))  # Obtener el día en texto
 		hour = agenda.start.hour
-		agenda_semanal[day][hour] = {'free': agenda.free, 'patient': agenda.rutP if not agenda.free else None}
+		
+		agenda_semanal[day][hour] = {'free': agenda.free}
+		
+		print(agenda_semanal)
 
 	return render_template('medic_dashboard.html', agenda=agenda_semanal, user=session['user'])
 
