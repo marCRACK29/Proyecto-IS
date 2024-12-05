@@ -150,7 +150,7 @@ def getMedicAgenda(rut):
 		data.append({
 			'ID': agenda.ID,
 			'rutM': agenda.rutM,
-			'day': agenda.start.strftime("%A %d"),
+			'day': agenda.start.strftime("%d"),
 			'month': agenda.start.strftime("%B"),
 			'year': agenda.start.strftime("%Y"),
 			'time': agenda.start.strftime("%H:%M"),
