@@ -98,7 +98,7 @@ class DataBase:
 		agendas = []
 		
 		for row in data:
-			agenda_item = Agenda(row[0], row[1], row[2], True)
+			agenda_item = Agenda(row[0], row[1], row[2], row[3])
 			
 			agendas.append(agenda_item)
 		
