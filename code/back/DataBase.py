@@ -103,7 +103,7 @@ class DataBase:
 			agendas.append(agenda_item)
 		
 		return agendas
-	
+
 	def getMedics(SELF):
 		query = "SELECT * FROM medic;"
 		data = None
