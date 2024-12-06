@@ -182,9 +182,9 @@ class DataBase:
 
 		return
 
-	def deleteAppointment(SELF, agendaID, rutM, rutP):
-		query = "DELETE FROM appointment WHERE agendaID = %s AND rutM = %s AND rutP = %s;"
-		data = (agendaID, rutM, rutP)
+	def deleteAppointment(SELF, agendaID, rutP):
+		query = "DELETE FROM appointment WHERE agendaID = %s AND rutP = %s;"
+		data = (agendaID, rutP)
 
 		try:
 			SELF.cursor.execute(query, data)

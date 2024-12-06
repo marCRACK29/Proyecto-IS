@@ -98,7 +98,7 @@
 					rutM: rutM
 				});
 				
-				const response = await fetch(`/api/createAppointment`, {method: "PUT", body: data});
+				const response = await fetch(`/api/createAppointment`, {method: "POST", body: data});
 				
 				if(response.ok)
 				{

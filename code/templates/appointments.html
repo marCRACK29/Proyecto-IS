@@ -53,8 +53,9 @@
                             data: null,
                             title: 'Acciones',
                             render: function (data, type, row) {
-                                return `<button onclick="cancelAppointment('${row.id}')">Cancelar</button>`;
+                                return `<button onclick="cancelAppointment('${row.agendaID}')">Cancelar</button>`;
                             }
+
                         }
                     ]
                 });
@@ -63,7 +64,7 @@
                 alert('Hubo un problema al cargar las citas.');
             }
         });
-
+        /**
         async function cancelAppointment(appointmentID) {
             if (confirm("¿Estás seguro de que quieres cancelar esta cita?")) {
                 try {
@@ -89,6 +90,33 @@
                 }
             }
         }
+        */
+        async function cancelAppointment(agendaID) {
+            if (confirm("¿Estás seguro de que quieres cancelar esta cita?")) {
+                try {
+                    const response = await fetch('/api/cancelAppointment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ agendaID: agendaID }) // Usa agendaID correctamente
+                    });
+
+                    const result = await response.json();
+
+                    if (response.status === 200 && result.success) {
+                        alert('Cita cancelada exitosamente');
+                        location.reload(); // Recarga la página para actualizar la tabla
+                    } else {
+                        alert(result.error || 'Error al cancelar la cita.');
+                    }
+                } catch (error) {
+                    console.error('Error al cancelar cita:', error);
+                    alert('Hubo un problema al cancelar la cita.');
+                }
+            }
+        }
+
     </script>
 
     <style>

@@ -161,70 +161,84 @@ def getMedicAgenda(rut):
 # API para obtener las citas del usuario (es específico, no global).
 @app.route('/api/user/appointment', methods=['GET'])
 def user_appointment():
-    if 'user' not in session or session['user']['role'] != 'patient':
-        return jsonify({'error': 'No autenticado'}), 401
+	if 'user' not in session or session['user']['role'] != 'patient':
+		return jsonify({'error': 'No autenticado'}), 401
 
-    rut = session['user']['rut']
+	rut = session['user']['rut']
 
-    try:
-        appointments = database.getAppointments(rut)
-        return jsonify(appointments)
-    except Exception as e:
-        print('Error al obtener citas:', e)
-        return jsonify({'error': 'Error al obtener citas'}), 500
+	try:
+		appointments = database.getAppointments(rut)
+
+		# Depuración: imprime las citas que se están devolviendo
+		print("Citas obtenidas:", appointments)
+
+		return jsonify(appointments)
+	except Exception as e:
+		print('Error al obtener citas:', e)
+		return jsonify({'error': 'Error al obtener citas'}), 500
+
 
 def get_appointment(self, patient):
-    query = """
+	query = """
         SELECT 
-            medic.name as doctor_name,
-            medic.area as doctor_area,
-            agenda.start as agenda_date,
-            agenda.start as agenda_time
+            medic.name AS doctor_name,
+            medic.area AS doctor_area,
+            agenda.start AS agenda_date,
+            agenda.start AS agenda_time,
+            agenda.ID AS agendaID  -- Agregamos el campo agendaID
         FROM APPOINTMENT
         JOIN medic ON appointment.rutM = medic.rut
         JOIN agenda ON appointment.agendaID = agenda.ID
         WHERE appointment.rutP = %s
     """
-    data = None
+	data = None
 
-    try:
-        self.cursor.execute(query, (patient,))
-        data = self.cursor.fetchall()
+	try:
+		# Ejecutamos la consulta
+		self.cursor.execute(query, (patient,))
+		data = self.cursor.fetchall()
 
-    except Exception as e:
-        raise Exception('Error al obtener citas:', e)
+	except Exception as e:
+		# Lanzamos una excepción detallada si algo falla
+		raise Exception('Error al obtener citas:', e)
 
-    appointments = []
+	appointments = []
 
-    for row in data:
-        medic_name = row['doctor_name']
-        medic_area = row['doctor_area']
-        agenda_date = row['agenda_date']
-        agenda_time = row['agenda_time']
+	# Procesamos los resultados
+	for row in data:
+		medic_name = row['doctor_name']
+		medic_area = row['doctor_area']
+		agenda_date = row['agenda_date']
+		agenda_time = row['agenda_time']
+		agenda_id = row['agendaID']  # Extraemos agendaID
 
-        medic = Medic(medic_name, medic_area)
-        appointment = Appointment(medic, patient, agenda_date, agenda_time)
+		# Creamos objetos para el médico y la cita
+		medic = Medic(medic_name, medic_area)
+		appointment = Appointment(medic, patient, agenda_date, agenda_time, agenda_id)
 
-        appointments.append(appointment)
+		appointments.append(appointment)
 
-    return appointments
+	return appointments
 
 @app.route('/api/cancelAppointment', methods=['POST'])
 def cancelAppointment():
-    data = json.loads(request.data)
+	try:
+		data = json.loads(request.data)
+		agendaID = data.get("agendaID")
 
-    agendaID = data["agendaID"]
-    rutM = data["rutM"]
-    rutP = session['user']['rut']
+		if not agendaID:
+			raise KeyError("agendaID faltante o inválido.")
 
-    try:
-        database.deleteAppointment(agendaID, rutM, rutP)
-        return jsonify({"message": "Cita cancelada correctamente."})
-    except Exception as e:
-        print(f"Error al cancelar la cita: {e}")
-        return jsonify({"error": "Error al cancelar la cita."}), 500
+		rutP = session['user']['rut']
+		database.deleteAppointment(agendaID, rutP)
 
-
+		return jsonify({"success": True})
+	except KeyError as e:
+		print(f"Clave faltante en los datos enviados: {e}")
+		return jsonify({"error": f"Clave faltante: {e}"}), 400
+	except Exception as e:
+		print(f"Error al cancelar la cita: {e}")
+		return jsonify({"error": "Error al cancelar la cita."}), 500
 
 
 @app.route('/my-appointments')
