@@ -209,6 +209,23 @@ def get_appointment(self, patient):
 
     return appointments
 
+@app.route('/api/cancelAppointment', methods=['POST'])
+def cancelAppointment():
+    data = json.loads(request.data)
+
+    agendaID = data["agendaID"]
+    rutM = data["rutM"]
+    rutP = session['user']['rut']
+
+    try:
+        database.deleteAppointment(agendaID, rutM, rutP)
+        return jsonify({"message": "Cita cancelada correctamente."})
+    except Exception as e:
+        print(f"Error al cancelar la cita: {e}")
+        return jsonify({"error": "Error al cancelar la cita."}), 500
+
+
+
 
 @app.route('/my-appointments')
 def my_appointments():

@@ -182,5 +182,19 @@ class DataBase:
 
 		return
 
-	def deleteAppointment(SELF, appointment):
-		return
+	def deleteAppointment(SELF, agendaID, rutM, rutP):
+		query = "DELETE FROM appointment WHERE agendaID = %s AND rutM = %s AND rutP = %s;"
+		data = (agendaID, rutM, rutP)
+
+		try:
+			SELF.cursor.execute(query, data)
+			print("APPOINTMENT DELETED")
+		except Exception as exception:
+			print(f"Error al cancelar la cita: {exception}")
+			raise Exception("[ERROR]")
+
+
+
+
+
+
