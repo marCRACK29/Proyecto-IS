@@ -100,7 +100,12 @@
 				
 				const response = await fetch(`/api/createAppointment`, {method: "PUT", body: data});
 				
-				console.log(response.status);
+				if(response.ok)
+				{
+					closeAgendaModal();
+					
+					window.alert("cita agendada");
+				}
 			}
 		</script>
 
