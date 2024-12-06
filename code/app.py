@@ -121,7 +121,7 @@ def getMedics():
     return jsonify(medicsData)
 
 
-@app.route('/api/createAppointment', methods=['PUT'])
+@app.route('/api/createAppointment', methods=['POST'])
 def createAppointment():
     data = json.loads(request.data)
 
@@ -151,6 +151,63 @@ def getMedicAgenda(rut):
         })
 
     return jsonify(data)
+
+# API para obtener las citas del usuario (es específico, no global).
+@app.route('/api/user/appointment', methods=['GET'])
+def user_appointment():
+    if 'user' not in session or session['user']['role'] != 'patient':
+        return jsonify({'error': 'No autenticado'}), 401
+
+    rut = session['user']['rut']
+
+    try:
+        appointments = database.getAppointments(rut)
+        return jsonify(appointments)
+    except Exception as e:
+        print('Error al obtener citas:', e)
+        return jsonify({'error': 'Error al obtener citas'}), 500
+
+def get_appointment(self, patient):
+    query = """
+        SELECT 
+            medic.name as doctor_name,
+            medic.area as doctor_area,
+            agenda.start as agenda_date,
+            agenda.start as agenda_time
+        FROM APPOINTMENT
+        JOIN medic ON appointment.rutM = medic.rut
+        JOIN agenda ON appointment.agendaID = agenda.ID
+        WHERE appointment.rutP = %s
+    """
+    data = None
+
+    try:
+        self.cursor.execute(query, (patient,))
+        data = self.cursor.fetchall()
+
+    except Exception as e:
+        raise Exception('Error al obtener citas:', e)
+
+    appointments = []
+
+    for row in data:
+        medic_name = row['doctor_name']
+        medic_area = row['doctor_area']
+        agenda_date = row['agenda_date']
+        agenda_time = row['agenda_time']
+
+        medic = Medic(medic_name, medic_area)
+        appointment = Appointment(medic, patient, agenda_date, agenda_time)
+
+        appointments.append(appointment)
+
+    return appointments
+
+
+@app.route('/my-appointments')
+def my_appointments():
+    return render_template('appointments.html')
+
 
 if __name__ == "__main__":
     app.run(debug = True)

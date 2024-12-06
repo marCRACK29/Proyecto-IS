@@ -124,25 +124,63 @@ class DataBase:
 			medics.append(medic)
 		
 		return medics
-	
-	def getAppointments(SELF, medic):
-		appointments = [Appointment(None, None, None, None)]
-		
+
+	def getAppointments(self, patient):
+		query = """
+	        SELECT 
+	            medic.name, medic.area, agenda.start 
+	        FROM appointment
+	        JOIN medic ON appointment.rutM = medic.rut
+	        JOIN agenda ON appointment.agendaID = agenda.ID
+	        WHERE appointment.rutP = %s;
+	    """
+		data = None
+
+		try:
+			self.cursor.execute(query, (patient,))
+			data = self.cursor.fetchall()
+
+		except Exception as exception:
+			raise Exception(f"[ERROR] {exception}")
+
+		appointments = []
+
+		for row in data:
+			# Creamos la instancia de Appointment con los detalles obtenidos
+			medic_name = row[0]
+			medic_area = row[1]
+			appointment_datetime = row[2]
+
+			# Asumiendo que `appointment_datetime` es un tipo datetime que contiene fecha y hora
+			appointment_date = appointment_datetime.strftime('%d-%m-%Y')  # Fecha formateada
+			appointment_time = appointment_datetime.strftime('%H:%M')  # Hora formateada
+
+			# Crear el objeto de la cita con los detalles del médico, fecha y hora
+			medic = Medic(None, medic_name, medic_area, None)  # Asumiendo que la clase `Medic` tiene un constructor así
+			appointment = Appointment(medic, patient, row[2], appointment_date, appointment_time)
+
+			appointments.append({
+				'medic': appointment.medic.name,  # Accediendo al nombre del médico
+				'speciality': appointment.medic.area,  # Accediendo al área del médico
+				'appointment_date': appointment.appointment_date,
+				'appointment_time': appointment.appointment_time
+			})
+
 		return appointments
-	
+
 	def createAppointment(SELF, agendaID, rutM, rutP):
 		query = "INSERT INTO appointment (agendaID, rutM, rutP) VALUES (%s, %s, %s);"
 		data = (agendaID, rutM, rutP)
-		
+
 		try:
 			SELF.cursor.execute(query, data)
-			
+
 			print("APPOINTMENT CREATED")
-		
+
 		except Exception as exception:
 			raise Exception("[ERROR]")
-		
+
 		return
-	
+
 	def deleteAppointment(SELF, appointment):
 		return

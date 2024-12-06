@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis citas</title>
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='style.css') }}">
+		<link rel = "stylesheet" href = "https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+		<script src = "https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src = "https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <h1>Mis citas</h1>
+
+    <button onclick="window.location.href='/'" style="position: sticky; top:10px; right:10px;">Volver al catálogo de médicos</button>
+
+    <table id="appointments" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Médico</th>
+                <th>Especialidad</th>
+                <th>Día</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try{
+                const response = await fetch('/api/user/appointment');
+                const data = await response.json();
+
+                console.log(data);  // Muestra los datos en la consola
+
+                if(response.status !== 200 || !Array.isArray(data)){
+                    alert('No se pudieron cargar las citas.');
+                    return;
+                }
+
+                $('#appointments').DataTable({
+                    destroy: true,
+                    data: data,
+                    columns:[
+                        {data: 'medic', title: 'Médico'},
+                        {data: 'speciality', title: 'Especialidad'},
+                        {data: 'appointment_date', title:'Fecha'},
+                        {data: 'appointment_time', title:'Hora'}
+                    ]
+                });
+            } catch(error){
+                console.error('Error al obtener citas:', error);
+                alert('Hubo un problema al cargar las citas.');
+            }
+        });
+    </script>
+
+    <style>
+        button{
+            background-color: #4CAF50;
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px
+        }
+    </style>
+</body>
+</html>

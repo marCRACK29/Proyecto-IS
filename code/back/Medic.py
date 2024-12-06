@@ -9,7 +9,6 @@ class Medic:
 		SELF.rut = rut
 		SELF.name = name
 		SELF.area = area
-		
 		SELF.agenda = agenda
 		
 		return
