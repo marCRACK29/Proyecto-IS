@@ -1,169 +1,188 @@
 <!DOCTYPE html>
-
 <html>
-	<head>
-		<meta charset = "UTF-8">
-		<title> Catálogo de Medicos </title>
-		
-		<link rel = "stylesheet" href = "{{ url_for('static', filename='style.css') }}">
-		<link rel = "stylesheet" href = "https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-		
-		<script src = "https://code.jquery.com/jquery-3.6.0.min.js"></script>
-		<script src = "https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-	</head>
-	
-	<body>
-		<h1> Catálogo de Médicos </h1>
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Médicos</title>
 
-        <button onclick="viewAppointments()" style="position: absolute; top: 10px; right: 10px;">Mis citas</button>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+</head>
 
-		<table id = "catalog" class = "display">
-			<thead>
-				<tr>
-					<th> Nombre </th>
-					<th> Especialidad </th>
-				</tr>
-			</thead>
-			
-			<tbody>
-			</tbody>
-		</table>
-		
-		<script>
-			async function fetchMedics()
-			{
-				const rawData = await fetch('/api/medics');
-				const medicData = await rawData.json();
+<body>
+<h1>Catálogo de Médicos</h1>
 
-				$('#catalog').DataTable({
-					data: medicData,
-					columns: [
-						{ data: 'name' },
-						{ data: 'speciality' }
-					],
-					rowCallback: function(row, data) {
-						$(row).on('click', function() {
-							openAgendaModal(data.rut, data.name);
-						});
-					}
-				});
-			}
+<button onclick="viewAppointments()" style="position: absolute; top: 10px; right: 10px;">Mis citas</button>
 
-			fetchMedics();
+<!-- Menú desplegable para filtrar por especialidad -->
+<label for="speciality-filter">Filtrar por Especialidad:</label>
+<select id="speciality-filter" onchange="filterBySpeciality()">
+    <option value="">Todas</option>
+</select>
 
-            function viewAppointments(){
-                window.location.href = '/my-appointments';
+<table id="catalog" class="display">
+    <thead>
+    <tr>
+        <th>Nombre</th>
+        <th>Especialidad</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    async function fetchMedics() {
+        const rawData = await fetch('/api/medics');
+        const medicData = await rawData.json();
+
+        // Llenar el menú desplegable con especialidades únicas
+        const specialities = [...new Set(medicData.map(medic => medic.speciality))];
+        const specialityFilter = document.getElementById('speciality-filter');
+        specialities.forEach(speciality => {
+            const option = document.createElement('option');
+            option.value = speciality;
+            option.textContent = speciality;
+            specialityFilter.appendChild(option);
+        });
+
+        // Configurar la tabla
+        $('#catalog').DataTable({
+            data: medicData,
+            columns: [
+                { data: 'name' },
+                { data: 'speciality' }
+            ],
+            rowCallback: function(row, data) {
+                $(row).on('click', function() {
+                    openAgendaModal(data.rut, data.name);
+                });
             }
+        });
 
-			function openAgendaModal(rut, medicName)
-			{
-				document.getElementById('medic-name').textContent = medicName;
-				document.getElementById('modal').style.display = 'flex';
-				
-				fetchAgenda(rut);
-			}
+        window.medicData = medicData; // Guardar los datos globalmente para filtrar
+    }
 
-			function closeAgendaModal()
-			{
-				document.getElementById('modal').style.display = 'none';
-			}
+    function filterBySpeciality() {
+        const selectedSpeciality = document.getElementById('speciality-filter').value;
+        const table = $('#catalog').DataTable();
 
-			async function fetchAgenda(rut)
-			{
-				const rawData = await fetch(`/api/medic/${rut}/agenda`);
-				const agendaData = await rawData.json();
+        if (selectedSpeciality) {
+            const filteredData = window.medicData.filter(medic => medic.speciality === selectedSpeciality);
+            table.clear().rows.add(filteredData).draw();
+        } else {
+            table.clear().rows.add(window.medicData).draw(); // Mostrar todos si no hay filtro
+        }
+    }
 
-				$('#agenda').DataTable({
-					destroy: true,
-					data: agendaData,
-					columns: [
-						{ data: 'day' },
-						{ data: 'month' },
-						{ data: 'year' },
-						{ data: 'time' },
-					],
-					rowCallback: function(row, data) {
-						$(row).on('click', function() {
-							createAppointment(data.ID, rut);
-						});
-					}
-				});
-			}
-			
-			async function createAppointment(agendaID, rutM)
-			{
-				var data = JSON.stringify({
-					agendaID: agendaID,
-					rutM: rutM
-				});
-				
-				const response = await fetch(`/api/createAppointment`, {method: "POST", body: data});
-				
-				if(response.ok)
-				{
-					closeAgendaModal();
-					
-					window.alert("cita agendada");
-				}
-			}
-		</script>
+    function viewAppointments() {
+        window.location.href = '/my-appointments';
+    }
 
-		<!-- Modal para Horarios -->
-		<div id="modal" style="display: none;">
-			<div id="modal-content">
-				<span id="close-modal" onclick="closeAgendaModal();">&times;</span>
-				<h2>Horas disponibles para <span id="medic-name"></span></h2>
-				<table id="agenda" class="display">
-					<thead>
-						<tr>
-							<th>Dia</th>
-							<th>Mes</th>
-							<th>Año</th>
-							<th>Hora</th>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
-			</div>
-		</div>
+    function openAgendaModal(rut, medicName) {
+        document.getElementById('medic-name').textContent = medicName;
+        document.getElementById('modal').style.display = 'flex';
 
-		<style>
-			/* Estilo básico para el modal y el botón */
+        fetchAgenda(rut);
+    }
 
-            button{
-                background-color: #4CAF50;
-                color: white;
-                padding: 15px 30px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px
+    function closeAgendaModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    async function fetchAgenda(rut) {
+        const rawData = await fetch('/api/medic/${rut}/agenda');
+        const agendaData = await rawData.json();
+
+        $('#agenda').DataTable({
+            destroy: true,
+            data: agendaData,
+            columns: [
+                { data: 'day' },
+                { data: 'month' },
+                { data: 'year' },
+                { data: 'time' },
+            ],
+            rowCallback: function(row, data) {
+                $(row).on('click', function() {
+                    createAppointment(data.ID, rut);
+                });
             }
-			#modal {
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				background-color: rgba(0, 0, 0, 0.5);
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-			#modal-content {
-				background: white;
-				padding: 20px;
-				border-radius: 8px;
-				width: 50%;
-			}
-			#close-modal {
-				cursor: pointer;
-				float: right;
-				font-size: 20px;
-			}
-		</style>
-    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
-	</body>
+        });
+    }
+
+    async function createAppointment(agendaID, rutM) {
+        var data = JSON.stringify({
+            agendaID: agendaID,
+            rutM: rutM
+        });
+
+        const response = await fetch('/api/createAppointment, { method: "POST", body: data }');
+
+        if (response.ok) {
+            closeAgendaModal();
+            window.alert("Cita agendada");
+        }
+    }
+
+    fetchMedics();
+</script>
+
+<!-- Modal para Horarios -->
+<div id="modal" style="display: none;">
+    <div id="modal-content">
+        <span id="close-modal" onclick="closeAgendaModal();">&times;</span>
+        <h2>Horas disponibles para <span id="medic-name"></span></h2>
+        <table id="agenda" class="display">
+            <thead>
+            <tr>
+                <th>Día</th>
+                <th>Mes</th>
+                <th>Año</th>
+                <th>Hora</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 50%;
+    }
+    #close-modal {
+        cursor: pointer;
+        float: right;
+        font-size: 20px;
+    }
+</style>
+<a href="{{ url_for('logout') }}">Cerrar sesión</a>
+</body>
 </html>
